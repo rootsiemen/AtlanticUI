@@ -23,6 +23,10 @@ interface ExpandableNavbarProps {
   className?: string;
 }
 
+// Shared, clearly visible keyboard focus indicator.
+const focusRing =
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-neutral-500 dark:focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-200 dark:focus-visible:ring-offset-neutral-900";
+
 export const ExpandableNavbar = ({
   brandLogo = <span className="text-xl font-bold italic tracking-tighter">AtlanticUI</span>,
   menuItems,
@@ -32,7 +36,36 @@ export const ExpandableNavbar = ({
   const [isOpen, setIsOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const toggleRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
   const panelId = useId();
+
+  const focusItem = (index: number) => {
+    itemRefs.current[index]?.focus();
+  };
+
+  // Arrow-key roving focus across the expanded panel's menu links.
+  const handlePanelKeyDown = (event: React.KeyboardEvent) => {
+    const count = menuItems.length;
+    if (count === 0) return;
+
+    const activeIndex = itemRefs.current.findIndex(
+      (el) => el === document.activeElement
+    );
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      focusItem(activeIndex === -1 ? 0 : (activeIndex + 1) % count);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      focusItem(activeIndex === -1 ? count - 1 : (activeIndex - 1 + count) % count);
+    } else if (event.key === "Home") {
+      event.preventDefault();
+      focusItem(0);
+    } else if (event.key === "End") {
+      event.preventDefault();
+      focusItem(count - 1);
+    }
+  };
 
   return (
     <motion.nav
@@ -68,7 +101,10 @@ export const ExpandableNavbar = ({
               <a
                 key={idx}
                 href={item.href}
-                className="hover:text-black dark:hover:text-white transition-colors"
+                className={cn(
+                  "rounded hover:text-black dark:hover:text-white transition-colors",
+                  focusRing
+                )}
               >
                 {item.title}
               </a>
@@ -82,9 +118,12 @@ export const ExpandableNavbar = ({
           type="button"
           aria-label={isOpen ? "Close navigation" : "Open navigation"}
           aria-expanded={isOpen}
-          aria-controls={isOpen ? panelId : undefined}
+          aria-controls={panelId}
           onClick={() => setIsOpen((open) => !open)}
-          className="flex items-center space-x-1.5 rounded-lg bg-neutral-300/60 dark:bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition"
+          className={cn(
+            "flex items-center space-x-1.5 rounded-lg bg-neutral-300/60 dark:bg-neutral-800 px-3 py-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200 hover:bg-neutral-300 dark:hover:bg-neutral-700 transition",
+            focusRing
+          )}
         >
           <span>{isOpen ? "Close" : ""}</span>
           <span aria-hidden="true" className="font-bold">:</span>
@@ -96,6 +135,9 @@ export const ExpandableNavbar = ({
         {isOpen && (
           <motion.div
             id={panelId}
+            role="region"
+            aria-label="Expanded navigation"
+            onKeyDown={handlePanelKeyDown}
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: "auto" }}
             exit={{ opacity: 0, height: 0 }}
@@ -107,10 +149,16 @@ export const ExpandableNavbar = ({
               {menuItems.map((item, index) => (
                 <a
                   key={index}
+                  ref={(el) => {
+                    itemRefs.current[index] = el;
+                  }}
                   href={item.href}
                   onMouseEnter={() => setHoveredIndex(index)}
                   onMouseLeave={() => setHoveredIndex(null)}
-                  className="group relative flex items-center justify-between rounded-xl p-2.5 transition duration-150 hover:bg-black/5 dark:hover:bg-white/5"
+                  className={cn(
+                    "group relative flex items-center justify-between rounded-xl p-2.5 transition duration-150 hover:bg-black/5 dark:hover:bg-white/5",
+                    focusRing
+                  )}
                 >
                   <div className="flex items-center space-x-3">
                     {item.icon ? (
@@ -129,13 +177,14 @@ export const ExpandableNavbar = ({
                     </span>
                   </div>
 
-                  {/* Contextual Subtitle on Hover */}
+                  {/* Contextual Subtitle on Hover (decorative until visible) */}
                   <motion.span
                     initial={{ opacity: 0, x: -5 }}
                     animate={{
                       opacity: hoveredIndex === index ? 1 : 0,
                       x: hoveredIndex === index ? 0 : -5,
                     }}
+                    aria-hidden={hoveredIndex !== index}
                     className="text-xs text-neutral-500 dark:text-neutral-400 font-mono"
                   >
                     {item.subtitle || "Explore"}
@@ -151,7 +200,10 @@ export const ExpandableNavbar = ({
                   <a
                     key={idx}
                     href={social.href}
-                    className="text-xs font-mono text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors"
+                    className={cn(
+                      "rounded text-xs font-mono text-neutral-500 dark:text-neutral-400 hover:text-black dark:hover:text-white transition-colors",
+                      focusRing
+                    )}
                   >
                     {social.label}
                   </a>
