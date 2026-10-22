@@ -7,6 +7,7 @@ import { BentoGridDemo } from "@/components/demos/bento-grid-demo";
 import { StackedGalleryDemo } from "@/components/demos/stacked-gallery-demo";
 import { ExpandableNavbarDemo } from "@/components/demos/expandable-navbar-demo";
 import { MorphingDropdownDemo } from "@/components/demos/morphing-dropdown-demo";
+import { LogoMarqueeDemo } from "@/components/demos/logo-marquee-demo";
 import { morphingDropdownCode } from "@/lib/code-snippets";
 
 // Snippets
@@ -15,6 +16,7 @@ import {
   bentoGridCode,
   stackedGalleryCode,
   expandableNavbarCode,
+  logoMarqueeCode,
 } from "@/lib/code-snippets";
 
 interface DocPageProps {
@@ -105,6 +107,22 @@ export default async function DocPage({ params }: DocPageProps) {
         </div>
         <ComponentPreview code={morphingDropdownCode}>
           <MorphingDropdownDemo />
+        </ComponentPreview>
+      </div>
+    );
+  }
+
+  if (slug === "logo-marquee") {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight">Logo Marquee</h1>
+          <p className="text-neutral-400 text-sm mt-2">
+            A seamless infinite-looping logo marquee with configurable speed, direction, hover-pause and edge fades.
+          </p>
+        </div>
+        <ComponentPreview code={logoMarqueeCode}>
+          <LogoMarqueeDemo />
         </ComponentPreview>
       </div>
     );

@@ -32,6 +32,7 @@ const docNavigation: DocNavGroup[] = [
       { title: "Stacked Card Gallery", slug: "stacked-gallery" },
       { title: "Expandable Navbar", slug: "expandable-navbar", isNew: true },
       { title: "Morphing Dropdown", slug: "morphing-dropdown", isNew: true },
+      { title: "Logo Marquee", slug: "logo-marquee", isNew: true },
     ],
   },
 ];
